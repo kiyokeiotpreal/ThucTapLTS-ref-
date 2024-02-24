@@ -30,7 +30,7 @@ public class ConfirmEmailService implements IConfirmEmailService {
         int randomNumber = random.nextInt(900000) + 100000;
         return String.valueOf(randomNumber);
     }
-    private void senEmail(String to, String subject, String content){
+    private void sendEmail(String to, String subject, String content){
         SimpleMailMessage message = new SimpleMailMessage();
         message.setFrom("doan77309@gmail.com");
         message.setTo(to);
@@ -58,7 +58,7 @@ public class ConfirmEmailService implements IConfirmEmailService {
         //todo Gửi email với mã code và thông tin
         String subject ="Xác nhận email của bạn";
         String content = "Mã xác thực của bạn là: " + confirmEmail.getConfirmCode();
-        senEmail(user.getEmail(),subject,content);
+        sendEmail(user.getEmail(),subject,content);
     }
 
     @Override

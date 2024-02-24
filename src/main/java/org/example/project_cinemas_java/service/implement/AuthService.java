@@ -1,17 +1,18 @@
 package org.example.project_cinemas_java.service.implement;
 
 import org.example.project_cinemas_java.components.JwtTokenUtils;
+import org.example.project_cinemas_java.exceptions.ConfirmPasswordIncorrect;
 import org.example.project_cinemas_java.exceptions.DataNotFoundException;
+import org.example.project_cinemas_java.model.ConfirmEmail;
 import org.example.project_cinemas_java.model.RefreshToken;
 import org.example.project_cinemas_java.model.Role;
 import org.example.project_cinemas_java.model.User;
 import org.example.project_cinemas_java.payload.dto.authdtos.LoginDTO;
+import org.example.project_cinemas_java.payload.request.auth_request.ChangePasswordRequest;
+import org.example.project_cinemas_java.payload.request.auth_request.ConfirmForgotPasswordRequest;
 import org.example.project_cinemas_java.payload.request.auth_request.LoginRequest;
 import org.example.project_cinemas_java.payload.request.auth_request.RegisterRequest;
-import org.example.project_cinemas_java.repository.RankCustomerRepo;
-import org.example.project_cinemas_java.repository.RoleRepo;
-import org.example.project_cinemas_java.repository.UserRepo;
-import org.example.project_cinemas_java.repository.UserStatusRepo;
+import org.example.project_cinemas_java.repository.*;
 import org.example.project_cinemas_java.service.iservice.IAuthService;
 import org.example.project_cinemas_java.utils.MessageKeys;
 import org.modelmapper.ModelMapper;
@@ -21,6 +22,7 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.DisabledException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -31,7 +33,7 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 
 @Service
-public class AuthService implements IAuthService {
+public class   AuthService implements IAuthService {
     @Autowired
     private UserRepo userRepo;
     @Autowired
@@ -52,8 +54,10 @@ public class AuthService implements IAuthService {
     private JwtTokenUtils jwtTokenUtils;
     @Autowired
     private RefreshTokenService refreshTokenService;
+    @Autowired
+    private ConfirmEmailRepo confirmEmailRepo;
     @Override
-    public User register(RegisterRequest registerRequest) throws Exception {
+    public User register(RegisterRequest registerRequest){
         String email = registerRequest.getEmail();
 
         if(userRepo.existsByEmail(email)){
@@ -83,7 +87,7 @@ public class AuthService implements IAuthService {
         if(existingUser == null) {
             throw new DataNotFoundException(MessageKeys.EMAIL_DOES_NOT_EXISTS);
         }
-        if(existingUser.isActive() == false){
+        if(!existingUser.isActive()){
             throw new DisabledException(MessageKeys.USER_ACCOUNT_IS_DISABLED);
         }
 
@@ -115,6 +119,35 @@ public class AuthService implements IAuthService {
                 .roles(roles)
                 .build();
         return loginDTO;
+    }
+
+    @Override
+    public void requestForgotPassword(String email) throws Exception {
+        User user = userRepo.findByEmail(email).orElse(null);
+        if(user == null) {
+            throw new DataNotFoundException(MessageKeys.EMAIL_DOES_NOT_EXISTS);
+        }
+        if(!user.isActive()){
+            throw new DisabledException(MessageKeys.USER_ACCOUNT_IS_DISABLED);
+        }
+    }
+
+    @Override
+    public void confirmForgotPassword(ConfirmForgotPasswordRequest confirmForgotPasswordRequest) throws Exception {
+        ConfirmEmail confirmEmail = confirmEmailRepo.findConfirmEmailByConfirmCode(confirmForgotPasswordRequest.getConfirmCode());
+        if(confirmEmail == null){
+            throw new DataNotFoundException(MessageKeys.INCORRECT_VERIFICATION_CODE);
+        }
+        BCryptPasswordEncoder bCryptPasswordEncoder = new BCryptPasswordEncoder();
+        String mkMoi = confirmForgotPasswordRequest.getMatKhauMoi();
+        if(!mkMoi.equals(confirmForgotPasswordRequest.getXacNhanMatKhau())){
+            throw new ConfirmPasswordIncorrect(MessageKeys.CONFIRM_PASSWORD_INCORRECT);
+        }
+        User user = userRepo.findByConfirmEmails(confirmEmail);
+        user.setPassword(bCryptPasswordEncoder.encode(mkMoi));
+        userRepo.save(user);
+        confirmEmail.setUser(null);
+        confirmEmailRepo.delete(confirmEmail);
     }
 
     public User registerRequestToUser(RegisterRequest registerRequest){

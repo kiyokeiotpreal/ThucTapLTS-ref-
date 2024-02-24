@@ -28,7 +28,7 @@ public class RefreshTokenService implements IRefreshTokenService {
         if(user == null){
             throw  new DataNotFoundException(MessageKeys.EMAIL_DOES_NOT_EXISTS);
         }
-        if (user.isActive() == false){
+        if (!user.isActive()){
             throw new Exception(MessageKeys.USER_ACCOUNT_IS_DISABLED);
         }
         RefreshToken refreshToken = RefreshToken.builder()

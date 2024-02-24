@@ -26,5 +26,9 @@ public class MessageKeys {
     public static final String EMAIL_ALREADY_EXISTS = "Email already exists";
     public static final String VERIFICATION_CODE_HAS_EXPIRED = "Verification code has expired";
 
+    public static final String USER_DOES_NOT_EXIST = "User does not exist";
+
+    public static final String CONFIRM_PASSWORD_INCORRECT = "Confirm password incorrect";
+
 
 }
