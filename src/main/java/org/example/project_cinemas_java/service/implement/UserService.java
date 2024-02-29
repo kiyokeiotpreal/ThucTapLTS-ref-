@@ -14,9 +14,6 @@ import org.springframework.stereotype.Service;
 public class UserService implements IUserService {
 
     @Autowired
-    private ConfirmEmailService confirmEmailService;
-
-    @Autowired
     private UserRepo userRepo;
     @Override
     public void updateInfoUser(User user) {

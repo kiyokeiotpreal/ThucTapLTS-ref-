@@ -9,17 +9,15 @@ import org.example.project_cinemas_java.exceptions.DisabledException;
 import org.example.project_cinemas_java.model.ConfirmEmail;
 import org.example.project_cinemas_java.model.User;
 import org.example.project_cinemas_java.payload.request.auth_request.*;
-import org.example.project_cinemas_java.repository.ConfirmEmailRepo;
-import org.example.project_cinemas_java.repository.UserRepo;
-import org.example.project_cinemas_java.repository.UserStatusRepo;
+import org.example.project_cinemas_java.repository.*;
 import org.example.project_cinemas_java.service.implement.AuthService;
-import org.example.project_cinemas_java.service.implement.ConfirmEmailService;
 import org.example.project_cinemas_java.utils.MessageKeys;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.AuthenticationException;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -30,22 +28,24 @@ public class AuthController {
     private AuthService authService;
 
     @Autowired
-    private ConfirmEmailService confirmEmailService;
-
-    @Autowired
     private ConfirmEmailRepo confirmEmailRepo;
 
+    @Autowired
+    private RoleRepo roleRepo;
+    @Autowired
+    private RankCustomerRepo rankCustomerRepo;
     @Autowired
     private UserRepo userRepo;
     @Autowired
     private UserStatusRepo userStatusRepo;
+    @Autowired
+    private PasswordEncoder passwordEncoder;
 
     @PostMapping("/register")
     public ResponseEntity<?> register(@RequestBody RegisterRequest registerRequest)  {
         try {
-            User user = authService.register(registerRequest);
-            confirmEmailService.sendConfirmEmail(user);
-            return ResponseEntity.ok().body("Kiểm tra email để xác nhận tài khoản");
+            authService.register(registerRequest);
+            return ResponseEntity.ok().body("Kiểm tra email để xác thực tài khoản");
         } catch (DataIntegrityViolationException | IllegalStateException ex){
             return ResponseEntity.badRequest().body(ex.getMessage());
         } catch (Exception e) {
@@ -76,11 +76,20 @@ public class AuthController {
     @GetMapping("/confirm-register")
     public ResponseEntity<?> confirmEmail (@RequestParam String confirmCode){
         try {
-            ConfirmEmail confirmEmail = confirmEmailRepo.findConfirmEmailByConfirmCode(confirmCode);
-            User user = userRepo.findByConfirmEmails(confirmEmail);
-
-            var isConfirm = confirmEmailService.confirmEmail(confirmCode);
+            var isConfirm = authService.confirmEmail(confirmCode);
             if(isConfirm){
+                String emailTemporary = authService.getEmailTemporary();
+                RegisterRequest registerRequest = authService.getPendingRegistration(emailTemporary);
+                User user = new User();
+                user.setPoint(0);
+                user.setName(registerRequest.getName());
+                user.setUserName(registerRequest.getUserName());
+                user.setRole(roleRepo.findById(2).orElse(null));
+                user.setEmail(emailTemporary);
+                user.setPassword(passwordEncoder.encode(registerRequest.getPassword()));
+                user.setPhoneNumber(registerRequest.getPhoneNumber());
+                user.setRankcustomer(rankCustomerRepo.findById(1).orElse(null));
+
                 user.setActive(true);
                 user.setUserStatus(userStatusRepo.findById(1).orElse(null));
                 userRepo.save(user);
@@ -100,8 +109,8 @@ public class AuthController {
         try {
             authService.requestForgotPassword(email);
             User user = userRepo.findByEmail(email).orElse(null);
-            confirmEmailService.sendConfirmEmail(user);
-            return ResponseEntity.ok().body("Kiểm tra email để đặt lại mật khẩu");
+            authService.sendConfirmEmail(email);
+            return ResponseEntity.ok().body("Kiểm tra email để đặt lại mật khẩu"   );
         }catch (DataNotFoundException | DisabledException ex){
             return ResponseEntity.badRequest().body(ex.getMessage());
         } catch (Exception e) {
@@ -116,7 +125,7 @@ public class AuthController {
             String confirmCode = confirmForgotPasswordRequest.getConfirmCode();
             ConfirmEmail confirmEmail = confirmEmailRepo.findConfirmEmailByConfirmCode(confirmCode);
             User user = userRepo.findByConfirmEmails(confirmEmail);
-            boolean isConfirm = confirmEmailService.confirmEmail(confirmCode);
+            boolean isConfirm = authService.confirmEmail(confirmCode);
             if(isConfirm){
                 authService.confirmForgotPassword(confirmForgotPasswordRequest);
 

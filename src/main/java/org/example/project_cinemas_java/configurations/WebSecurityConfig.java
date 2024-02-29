@@ -48,35 +48,19 @@ public class WebSecurityConfig {
                                     String.format("%s/users/confirmForgotPassword", apiPrefix)
                             )
                             .permitAll()
-                            .requestMatchers(POST,
-                                    String.format("%s/post/**", apiPrefix)).permitAll()
-                            .requestMatchers(DELETE,
-                                    String.format("%s/post/**", apiPrefix)).permitAll()
-                            .requestMatchers(PUT,
-                                    String.format("%s/post/**", apiPrefix)).permitAll()
-                            .requestMatchers(PUT,
-                                    String.format("%s/adminApprovePost/**", apiPrefix)).hasRole("ADMIN")
-                            .requestMatchers(GET,
-                                    String.format("%s/adminApprovePost/**", apiPrefix)).hasRole("ADMIN")
-                            .requestMatchers(GET,
-                                    String.format("%s/users/getAllUser", apiPrefix)).hasRole("ADMIN")
-                            .requestMatchers(PUT,
-                                    String.format("%s/users/lock-user", apiPrefix)).hasRole("ADMIN")
-                            .requestMatchers(GET,
-                                    String.format("%s/users/total-user-count", apiPrefix)).hasRole("ADMIN")
-                            .requestMatchers(GET,String.format("%s/users/total-user-locked", apiPrefix)).hasRole("ADMIN")
-                            .requestMatchers(GET,String.format("%s/post/total-post-count", apiPrefix)).hasRole("ADMIN")
-                            .requestMatchers(GET,String.format("%s/course/total-course-count", apiPrefix)).hasRole("ADMIN")
-                            .requestMatchers(POST, String.format("/%s/userCourse/**",apiPrefix)).permitAll()
-                            .requestMatchers(PUT, String.format("/%s/userCourse/**",apiPrefix)).permitAll()
-                            .requestMatchers(GET, String.format("/%s/userCourse/**",apiPrefix)).permitAll()
-                            .requestMatchers(DELETE, String.format("/%s/userCourse/**",apiPrefix)).permitAll()
-                            .requestMatchers(POST, String.format("/%s/course/**",apiPrefix)).permitAll()
                             .requestMatchers(POST, String.format("/%s/user/refreshtoken",apiPrefix)).hasRole("ADMIN")
                             .requestMatchers(POST, String.format("/%s/user/refreshtoken",apiPrefix)).hasRole("USER")
                             .requestMatchers(PUT, String.format("/%s/user/changePassword",apiPrefix)).hasRole("USER")
                             .requestMatchers(PUT, String.format("/%s/user/changePassword",apiPrefix)).hasRole("ADMIN")
-
+                            .requestMatchers(POST, String.format("/%s/admin/addCinema",apiPrefix)).hasRole("ADMIN")
+                            .requestMatchers(PUT, String.format("/%s/admin/updateCinema",apiPrefix)).hasRole("ADMIN")
+                            .requestMatchers(POST, String.format("/%s/admin/addRoom",apiPrefix)).hasRole("ADMIN")
+                            .requestMatchers(PUT, String.format("/%s/admin/updateRoom",apiPrefix)).hasRole("ADMIN")
+                            .requestMatchers(POST, String.format("/%s/admin/addSeat",apiPrefix)).hasRole("ADMIN")
+                            .requestMatchers(PUT, String.format("/%s/admin/updateSeat",apiPrefix)).hasRole("ADMIN")
+                            .requestMatchers(POST, String.format("/%s/admin/addFood",apiPrefix)).hasRole("ADMIN")
+                            .requestMatchers(PUT, String.format("/%s/admin/updateFood",apiPrefix)).hasRole("ADMIN")
+                            .requestMatchers(DELETE, String.format("/%s/admin/deleteFood",apiPrefix)).hasRole("ADMIN")
                             .anyRequest().authenticated();
                     //.anyRequest().permitAll();
 

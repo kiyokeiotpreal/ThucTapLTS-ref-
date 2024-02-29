@@ -30,5 +30,19 @@ public class MessageKeys {
 
     public static final String CONFIRM_PASSWORD_INCORRECT = "Confirm password incorrect";
 
+    public static final String CODE_ALREADY_EXISTS = "Code already exists";
+    public static final String ADDRESS_ALREADY_EXISTS = "Address already exists";
+
+    public static final String CINEMA_NOT_FOUND = "CINEMA_NOT_FOUND";
+
+    public static final String ROOM_NOT_FOUND = "ROOM_NOT_FOUND";
+    public static final String SEAT_NOT_FOUND = "SEAT_NOT_FOUND";
+    public static final String SEAT_TYPE_NOT_FOUND = "SEAT_TYPE_NOT_FOUND";
+    public static final String SEAT_STATUS_NOT_FOUND = "SEAT_STATUS_NOT_FOUND";
+    public static final String SEAT_HAS_ALREADY_EXISTED = "SEAT_HAS_ALREADY_EXISTED";
+    public static final String SEAT_WANT_TO_UPDATE_HAS_ALREADY_EXISTED = "SEAT_WANT_TO_UPDATE_HAS_ALREADY_EXISTED";
+    public static final String FOOD_HAS_ALREADY_EXISTED = "FOOD_HAS_ALREADY_EXISTED";
+
+    public static final String FOOD_NOT_FOUND = "FOOD_NOT_FOUND";
 
 }

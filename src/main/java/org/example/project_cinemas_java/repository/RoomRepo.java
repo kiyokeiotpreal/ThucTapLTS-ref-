@@ -6,4 +6,7 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public interface RoomRepo extends JpaRepository<Room, Integer> {
+    boolean existsByCode(String code);
+
+    boolean existsByCodeAndIdNot(String code, int id);
 }

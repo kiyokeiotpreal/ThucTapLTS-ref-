@@ -10,12 +10,16 @@ import org.example.project_cinemas_java.payload.request.auth_request.LoginReques
 import org.example.project_cinemas_java.payload.request.auth_request.RegisterRequest;
 
 public interface IAuthService {
-    User register(RegisterRequest registerRequest) throws Exception;
+    void register(RegisterRequest registerRequest) throws Exception;
 
     LoginDTO login(LoginRequest loginRequest) throws Exception;
 
     void requestForgotPassword(String email) throws Exception;
 
     void confirmForgotPassword(ConfirmForgotPasswordRequest confirmForgotPasswordRequest) throws Exception;
+
+
+    void sendConfirmEmail(String email);
+    boolean confirmEmail(String confirmCode) throws Exception;
 
 }
